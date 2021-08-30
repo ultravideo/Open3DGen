@@ -92,7 +92,7 @@ The visualization can be disabled by commenting the line `#define DEBUG_VISUALIZ
 ## Demo Scene
 A demo RGB-D sequence is provided [here](http://ultravideo.fi/open3dgen/demo_rock.tar.xz). Extract the `demo_rock` folder into `data_files/`, and execute the following command.
 
-`./build/Open3DGen in data_files/demo_rock/ intr data_files/realsense_intrinsic_1280.matrix out data_files/out/ refine_cameras false reject_blur 1.1 crop false skip_stride 28 unwrap true pipeline full poisson_depth 7 simplify_voxel_size 0.075 out_res 4096 depth_far_clip 3.0 max_feature_count 2000 assets_path data_files/`
+`./build/Open3DGen in data_files/demo_rock/ intr data_files/realsense_intrinsic_1280.matrix out data_files/out/ refine_cameras false reject_blur 1.1 crop false skip_stride 28 unwrap true pipeline full poisson_depth 7 simplify_voxel_size 0.075 out_res 4096 depth_far_clip 3.0 max_feature_count 750 assets_path data_files/`
 
 The resulting `.obj`, `.mtl` and textures will be in the folder `data_files/out/`. It is recommended the `_dilated.png` texture is used. Use e.g. Blender to visualize the results.
 
