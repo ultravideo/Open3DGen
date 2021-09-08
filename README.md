@@ -113,7 +113,6 @@ The supported command line arguments are as follows
 - mesh poisson depth reconstruction depth (`poisson_depth`, 9 by default)
 - specify the mesh simplification (`simplify_voxel_size`, disabled by default (`0.0`), in meters, e.g. 5cm would be 0.05. Larger values result in lower quality but speed up the texture projection significantly. 5cm-15cm is generally a good range of values to try)
 - export intermediary mesh, before texture projection (`export_mesh_interm`, `true`/`false`, default `false`)
-- use a specific mesh for projection (`mesh_path`)
 - the parts of the pipeline that will be run (`pipeline`, options are `full`, `only_pointcloud`, `only_mesh`, or `only_project`)
 	- `full` runs the entire sequence and the output is a textured mesh
 	- `only_pointcloud` localizes the cameras and creates a pointcloud. Camera positions are serialized into a file in the `out` -folder
