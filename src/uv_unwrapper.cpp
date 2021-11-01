@@ -108,8 +108,8 @@ void pad_uvs(std::vector<Eigen::Vector2d>& uv_coords, const std::vector<uint32_t
         Eigen::Vector2d& uv2 = uv_coords[indices[ii + 2]];
 
         const Eigen::Vector2d refpos = Eigen::Vector2d(
-            min(uv0.x(), min(uv1.x(), uv2.x())),
-            min(uv0.y(), min(uv1.y(), uv2.y()))
+            min_arg(uv0.x(), min_arg(uv1.x(), uv2.x())),
+            min_arg(uv0.y(), min_arg(uv1.y(), uv2.y()))
             );
 
         uv0 -= refpos;
