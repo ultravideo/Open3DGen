@@ -18,7 +18,7 @@ namespace stitcher3d
 {
 namespace uv
 {
-
+  
 void unwrap_uvs_xatlas(std::shared_ptr<surface::SurfaceMesh> mesh);
 
 Eigen::Vector2d get_point_uv(const Eigen::Vector3d& p0, const Eigen::Vector3d& p1,

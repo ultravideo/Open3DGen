@@ -92,7 +92,7 @@ The visualization can be disabled by commenting the line `#define DEBUG_VISUALIZ
 ## Demo Scene
 A demo RGB-D sequence is provided [here](http://ultravideo.fi/open3dgen/demo_rock.tar.xz). Extract the `demo_rock` folder into `data_files/`, and execute the following command.
 
-`./build/Open3DGen in data_files/demo_rock/ intr data_files/realsense_intrinsic_1280.matrix out data_files/out/ refine_cameras false reject_blur 1.1 crop false skip_stride 28 unwrap true pipeline full poisson_depth 7 simplify_voxel_size 0.075 out_res 4096 depth_far_clip 3.0 max_feature_count 2000 assets_path data_files/`
+`./build/Open3DGen in data_files/demo_rock/ intr data_files/realsense_intrinsic_1280.matrix out data_files/out/ refine_cameras false reject_blur 1.1 crop false skip_stride 28 unwrap true pipeline full poisson_depth 7 simplify_voxel_size 0.075 out_res 4096 depth_far_clip 3.0 max_feature_count 750 assets_path data_files/`
 
 The resulting `.obj`, `.mtl` and textures will be in the folder `data_files/out/`. It is recommended the `_dilated.png` texture is used. Use e.g. Blender to visualize the results.
 
@@ -113,7 +113,6 @@ The supported command line arguments are as follows
 - mesh poisson depth reconstruction depth (`poisson_depth`, 9 by default)
 - specify the mesh simplification (`simplify_voxel_size`, disabled by default (`0.0`), in meters, e.g. 5cm would be 0.05. Larger values result in lower quality but speed up the texture projection significantly. 5cm-15cm is generally a good range of values to try)
 - export intermediary mesh, before texture projection (`export_mesh_interm`, `true`/`false`, default `false`)
-- use a specific mesh for projection (`mesh_path`)
 - the parts of the pipeline that will be run (`pipeline`, options are `full`, `only_pointcloud`, `only_mesh`, or `only_project`)
 	- `full` runs the entire sequence and the output is a textured mesh
 	- `only_pointcloud` localizes the cameras and creates a pointcloud. Camera positions are serialized into a file in the `out` -folder
