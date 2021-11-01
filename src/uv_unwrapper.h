@@ -18,6 +18,12 @@ namespace stitcher3d
 {
 namespace uv
 {
+  
+template <typename T>
+inline T min_arg(const T &a, const T &b)
+{
+  return a < b ? a : b;
+}
 
 void unwrap_uvs_xatlas(std::shared_ptr<surface::SurfaceMesh> mesh);
 
