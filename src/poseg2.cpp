@@ -502,7 +502,9 @@ namespace stitcher3d
 
 
             std::shared_ptr<o3d::geometry::TriangleMesh> camera_mesh = std::make_shared<o3d::geometry::TriangleMesh>(o3d::geometry::TriangleMesh());
-            o3d::io::ReadTriangleMeshFromOBJ(reg_params.assets_path + DEBUG_CAMERA_PATH, *camera_mesh, false);
+            o3d::io::ReadTriangleMeshOptions opts;
+            opts.enable_post_processing = false;
+            o3d::io::ReadTriangleMeshFromOBJ(reg_params.assets_path + DEBUG_CAMERA_PATH, *camera_mesh, opts);
             camera_mesh->Transform(cam->T);
 
             auto cloud = std::make_shared<o3d::geometry::PointCloud>(o3d::geometry::PointCloud(points3d));
@@ -690,10 +692,10 @@ namespace stitcher3d
 
         // o3d::visualization::DrawGeometries({cam_cloud_downsampled, ref_cam_cloud_downsampled});
 
-        auto result = o3d::registration::RegistrationICP(
+        auto result = o3d::pipelines::registration::RegistrationICP(
             *cam_cloud_downsampled, *ref_cam_cloud_downsampled, distance_threshold, initial_transform,
-            o3d::registration::TransformationEstimationPointToPoint()); //,
-            // o3d::registration::ICPConvergenceCriteria(1e-6, 1e-6, ICP_ITER_COUNT));
+            o3d::pipelines::registration::TransformationEstimationPointToPoint()); //,
+            // o3d::pipelines::registration::ICPConvergenceCriteria(1e-6, 1e-6, ICP_ITER_COUNT));
 
         if (result.fitness_ >= ICP_FITNESS_THRESHOLD)
         {
@@ -1970,6 +1972,8 @@ namespace stitcher3d
         if (only_scale)
             return;
 
+        const Eigen::Vector3d zero_center(0.0, 0.0, 0.0);
+
         // project depth images to pointclouds
         for (int i = 0; i < cameras.size(); i++)
         {
@@ -1984,7 +1988,7 @@ namespace stitcher3d
                 continue;
             }
 
-            cloud->Scale(this->pointcloud_scale, false);
+            cloud->Scale(this->pointcloud_scale, zero_center);
             cloud->Transform(cameras[i]->T);
 
             depth_pointclouds.emplace_back(cloud);
@@ -2237,12 +2241,14 @@ namespace stitcher3d
                 continue;
 
             std::shared_ptr<o3d::geometry::TriangleMesh> camera_mesh = std::make_shared<o3d::geometry::TriangleMesh>(o3d::geometry::TriangleMesh());
-            o3d::io::ReadTriangleMeshFromOBJ(reg_params.assets_path + DEBUG_CAMERA_PATH, *camera_mesh, false);
-            
+            o3d::io::ReadTriangleMeshOptions opts;
+            opts.enable_post_processing = false;
+            o3d::io::ReadTriangleMeshFromOBJ(reg_params.assets_path + DEBUG_CAMERA_PATH, *camera_mesh, opts);
+            const Eigen::Vector3d zero_center(0.0, 0.0, 0.0);
             if (pointcloud_scale == 0.0f)
-                camera_mesh->Scale(1.0f);
+                camera_mesh->Scale(1.0f, zero_center);
             else
-                camera_mesh->Scale(pointcloud_scale * CAMERA_SCALE);
+                camera_mesh->Scale(pointcloud_scale * CAMERA_SCALE, zero_center);
 
             camera_mesh->Transform(c->T);
 

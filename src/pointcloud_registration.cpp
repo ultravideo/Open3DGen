@@ -1,3 +1,4 @@
+#include <memory>
 #include "pointcloud_registration.h"
 #include "registration_params.h"
 
@@ -273,10 +274,10 @@ std::tuple<Eigen::Matrix4d_u, bool> register_pointclouds_slow(const o3d::geometr
 {
     float current_voxel_size = voxel_size;
 
-    std::vector<std::reference_wrapper<const o3d::registration::CorrespondenceChecker>> corr_checkers;
-    o3d::registration::RegistrationResult result;
+    std::vector<std::reference_wrapper<const o3d::pipelines::registration::CorrespondenceChecker>> corr_checkers;
+    o3d::pipelines::registration::RegistrationResult result;
     double global_fitness = 0;
-
+    bool mutual_filter = false;
 
     // global registration
     for (int i = 0; i < max_iter_count; i++)
@@ -288,16 +289,16 @@ std::tuple<Eigen::Matrix4d_u, bool> register_pointclouds_slow(const o3d::geometr
         auto [t_down, t_fpfh] = downsample_and_fpfh_pcloud(target, current_voxel_size);
 
         corr_checkers.clear();
-        auto chk_edge_len = o3d::registration::CorrespondenceCheckerBasedOnEdgeLength(0.9);
+        auto chk_edge_len = o3d::pipelines::registration::CorrespondenceCheckerBasedOnEdgeLength(0.9);
         corr_checkers.push_back(chk_edge_len);
-        auto chk_dist = o3d::registration::CorrespondenceCheckerBasedOnDistance(distance_threshold);
+        auto chk_dist = o3d::pipelines::registration::CorrespondenceCheckerBasedOnDistance(distance_threshold);
         corr_checkers.push_back(chk_dist);
-        auto chk_norm = o3d::registration::CorrespondenceCheckerBasedOnNormal(0.52359878);
+        auto chk_norm = o3d::pipelines::registration::CorrespondenceCheckerBasedOnNormal(0.52359878);
         corr_checkers.push_back(chk_norm);
 
-        result = o3d::registration::RegistrationRANSACBasedOnFeatureMatching(
-            *s_down, *t_down, *s_fpfh, *t_fpfh, distance_threshold, o3d::registration::TransformationEstimationPointToPoint(false),
-            4, corr_checkers, o3d::registration::RANSACConvergenceCriteria(RANSAC_MAX_ITER, RANSAC_MAX_VALIDATION)
+        result = o3d::pipelines::registration::RegistrationRANSACBasedOnFeatureMatching(
+            *s_down, *t_down, *s_fpfh, *t_fpfh, mutual_filter, distance_threshold, o3d::pipelines::registration::TransformationEstimationPointToPoint(false),
+            4, corr_checkers, o3d::pipelines::registration::RANSACConvergenceCriteria(RANSAC_MAX_ITER, RANSAC_MAX_VALIDATION)
         );
 
         global_fitness = result.fitness_;
@@ -322,6 +323,8 @@ Eigen::Matrix4d_u colored_ICP(const Eigen::Matrix4d& initial_transform, const o3
     std::vector<float> voxel_radius {voxel_size, voxel_size / 2.0f, voxel_size / 4.0f};
     std::vector<int> iters {50, 30, 14};
     Eigen::Matrix4d_u current_transform = initial_transform;
+    const double relative_fitness = 1e-6;
+    const double relative_rmse = 1e-6;
 
     for (int scale = 0; scale < 3; scale++)
     {
@@ -334,8 +337,9 @@ Eigen::Matrix4d_u colored_ICP(const Eigen::Matrix4d& initial_transform, const o3
         source_down->EstimateNormals(o3d::geometry::KDTreeSearchParamHybrid(radius * 2.0f, 30));
         target_down->EstimateNormals(o3d::geometry::KDTreeSearchParamHybrid(radius * 2.0f, 30));
 
-        auto result_icp = o3d::registration::RegistrationColoredICP(*source_down, *target_down, radius, current_transform,
-            o3d::registration::ICPConvergenceCriteria(1e-6, 1e-6, current_iter_count));
+        auto result_icp = o3d::pipelines::registration::RegistrationColoredICP(*source_down, *target_down, radius, current_transform, 
+            o3d::pipelines::registration::TransformationEstimationForColoredICP(),
+            o3d::pipelines::registration::ICPConvergenceCriteria(relative_fitness, relative_rmse, current_iter_count));
 
         current_transform = result_icp.transformation_;
     }
@@ -354,9 +358,9 @@ Eigen::Matrix4d_u registration_ICP(const Eigen::Matrix4d& initial_transform, con
     target_cpy->EstimateNormals(o3d::geometry::KDTreeSearchParamHybrid(0.1, 30));
 
     float distance_threshold = voxel_size * 0.4f;
-    auto result = o3d::registration::RegistrationICP(
+    auto result = o3d::pipelines::registration::RegistrationICP(
         *source_cpy, *target_cpy, distance_threshold, initial_transform, 
-        o3d::registration::TransformationEstimationPointToPlane()
+        o3d::pipelines::registration::TransformationEstimationPointToPlane()
     );
 
     return result.transformation_;
@@ -367,7 +371,7 @@ down_fpfh downsample_and_fpfh_pcloud(const o3d::geometry::PointCloud& cloud, con
     auto dcloud = cloud.VoxelDownSample(voxel_size);
     dcloud->EstimateNormals(o3d::geometry::KDTreeSearchParamHybrid(voxel_size * 2.0f, 30));
 
-    auto dfpfh = o3d::registration::ComputeFPFHFeature(*dcloud, 
+    auto dfpfh = o3d::pipelines::registration::ComputeFPFHFeature(*dcloud, 
             o3d::geometry::KDTreeSearchParamHybrid(voxel_size * 5.0f, 1000));
 
     return std::make_tuple(dcloud, dfpfh);

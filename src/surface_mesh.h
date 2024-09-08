@@ -76,11 +76,12 @@ public:
 
     void scale(const double scaling_factor)
     {
+        const Eigen::Vector3d zero_center(0.0, 0.0, 0.0);
         if (m_pointcloud != nullptr)
-            m_pointcloud->Scale(scaling_factor);
+            m_pointcloud->Scale(scaling_factor, zero_center);
 
         if (m_mesh != nullptr)
-            m_mesh->Scale(scaling_factor);
+            m_mesh->Scale(scaling_factor, zero_center);
     }
 
     static inline std::shared_ptr<surface::SurfaceMesh> mesh_from_cameras_and_obj(
@@ -89,11 +90,11 @@ public:
     {
         std::vector<std::shared_ptr<o3d::geometry::PointCloud>> clouds;
         std::vector<std::shared_ptr<const o3d::geometry::Geometry>> debug_clouds;
-
+        const Eigen::Vector3d zero_center(0.0, 0.0, 0.0);
         for (const auto cam : cameras)
         {
             auto cloud = rgbd::create_pcloud_from_rgbd(*cam->rgb, *cam->depth, DEFAULT_DEPTH_SCALE, DEFAULT_CLOUD_FAR_CLIP, false, cam->intr);
-            cloud->Scale(pointcloud_scale, false);
+            cloud->Scale(pointcloud_scale, zero_center);
             cloud->Transform(cam->T);
 
             clouds.push_back(cloud);
@@ -111,7 +112,10 @@ public:
         if (obj_path != "")
         {
             obj_mesh = std::make_shared<o3d::geometry::TriangleMesh>(o3d::geometry::TriangleMesh());
-            const bool status = o3d::io::ReadTriangleMeshFromOBJ(obj_path, *obj_mesh, true);
+            //enable_post_processing
+            o3d::io::ReadTriangleMeshOptions options;
+            options.enable_post_processing = true;
+            const bool status = o3d::io::ReadTriangleMeshFromOBJ(obj_path, *obj_mesh, options);
             mesh->m_mesh = obj_mesh;
             mesh->m_triangles = mesh->m_mesh->triangles_;
             mesh->m_vertices = mesh->m_mesh->vertices_;

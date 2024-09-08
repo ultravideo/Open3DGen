@@ -127,7 +127,7 @@ namespace stitcher3d
     static const std::string DATAFILE_PATH(
         "data_files/");
 
-    typedef std::tuple<std::shared_ptr<o3d::geometry::PointCloud>, std::shared_ptr<o3d::registration::Feature>> down_fpfh;
+    typedef std::tuple<std::shared_ptr<o3d::geometry::PointCloud>, std::shared_ptr<o3d::pipelines::registration::Feature>> down_fpfh;
 
     static const std::vector<double> POCOF2_DISTORTION_COEFF_1280 { 0.06604662, -0.19640715, -0.00081006, 0.00031392, 0.20096299 };
     static const std::vector<double> POCOF2_DISTORTION_COEFF_1080 { 0.07125934, -0.1270845, 0.00058086, 0.0017399, 0.06769205 };

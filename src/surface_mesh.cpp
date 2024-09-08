@@ -42,11 +42,12 @@ void SurfaceMesh::crop_mesh(o3d::geometry::OrientedBoundingBox bbox)
 {
     // a hacky workaround, because Crop() doesn't work unless the bbox rotation is identity
     const Eigen::Matrix3d R = bbox.R_;
-    m_mesh->Rotate(R.inverse());
-    bbox.Rotate(R.inverse());
+    const Eigen::Vector3d zero_center(0.0, 0.0, 0.0);
+    m_mesh->Rotate(R.inverse(), zero_center);
+    bbox.Rotate(R.inverse(), zero_center);
 
     auto new_mesh = m_mesh->Crop(bbox);
-    new_mesh->Rotate(R);
+    new_mesh->Rotate(R, zero_center);
 
     new_mesh->RemoveDuplicatedVertices();
     new_mesh->RemoveUnreferencedVertices();

@@ -62,8 +62,10 @@ int main(int argc, char* argv[])
             outfile << utilities::serialize_cameras_to_str(cameras, pcloud_scale);
             outfile.close();
         }
+        o3d::io::WritePointCloudOption opts;
+        opts.write_ascii = o3d::io::WritePointCloudOption::IsAscii(false);
 
-        o3d::io::WritePointCloudToPLY(output_path + "/reconstructed_point_cloud.ply", *mesh->get_pointcloud());
+        o3d::io::WritePointCloudToPLY(output_path + "/reconstructed_point_cloud.ply", *mesh->get_pointcloud(), opts);
 
         mesh->generate_mesh(poisson_depth);
         tt.stop("mesh generation");
@@ -71,8 +73,9 @@ int main(int argc, char* argv[])
         // cut the poisson artefacts out
         if (do_crop)
         {
+            const Eigen::Vector3d zero_center(0.0, 0.0, 0.0);
             // balloon the bounding box outwards to avoid cropping wanted detail
-            const auto bbox = std::make_shared<o3d::geometry::OrientedBoundingBox>(mesh->get_pointcloud()->GetOrientedBoundingBox().Scale(BOUNDING_BOX_SCALE_FACTOR, true));
+            const auto bbox = std::make_shared<o3d::geometry::OrientedBoundingBox>(mesh->get_pointcloud()->GetOrientedBoundingBox().Scale(BOUNDING_BOX_SCALE_FACTOR, zero_center));
             mesh->crop_mesh(*bbox);
 
             #ifdef DEBUG_VISUALIZE
