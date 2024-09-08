@@ -914,6 +914,7 @@ private:
 
     static void DEBUG_visualize_features(const std::shared_ptr<o3d::geometry::Image> img, const std::vector<cv::Point2f> features)
     {
+      #ifndef OPEN3DGEN_HEADLESS
         const cv::Mat imgcv = rgbd::o3d_image_to_cv_image(img);
 
         float h_i = 0.0f;
@@ -931,12 +932,16 @@ private:
 
         cv::imshow("debug_features", imgcv);
         cv::waitKey(0);
+      #else
+      return;    
+      #endif
     }
 
     static void DEBUG_visualize_matches(const Camera* ref_cam, 
         const Camera* cam, const std::vector<std::pair<uint32_t, uint32_t>> feature_matches,
         const int time_on_screen = 0)
     {
+      #ifndef OPEN3DGEN_HEADLESS
         std::vector<cv::KeyPoint> fkp1, fkp2;
         std::vector<cv::DMatch> matches;
 
@@ -952,6 +957,9 @@ private:
         cv::cvtColor(matchimg, matchimg, cv::COLOR_BGR2RGB);
         cv::imshow("img", matchimg);
         cv::waitKey(time_on_screen);
+      #else
+      return; 
+      #endif
     }
 
     void DEBUG_visualize_landmarks(const std::vector<cv::Point3f> points) const;

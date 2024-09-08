@@ -1,5 +1,32 @@
 #include "shader_stuff.h"
 
+#ifdef OPEN3DGEN_HEADLESS 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <GL/gl.h>
+EGLContext ctx;
+EGLDisplay eglDpy;
+  static const EGLint configAttribs[] = {
+          EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+          EGL_BLUE_SIZE, 8,
+          EGL_GREEN_SIZE, 8,
+          EGL_RED_SIZE, 8,
+          EGL_DEPTH_SIZE, 8,
+          EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
+          EGL_NONE
+  };    
+
+  static const int pbufferWidth = 640;
+  static const int pbufferHeight = 480;
+
+  static const EGLint pbufferAttribs[] = {
+        EGL_WIDTH, pbufferWidth,
+        EGL_HEIGHT, pbufferHeight,
+        EGL_NONE,
+  };
+#endif
+
+
 
 namespace stitcher3d
 {
@@ -28,6 +55,23 @@ bool get_gl_error(GLuint shader_i)
 
 std::shared_ptr<std::vector<pixel_data>> dispatch_compute_shader(shader_info& s_info)
 {
+    #ifdef OPEN3DGEN_HEADLESS
+    PFNGLUSEPROGRAMPROC glUseProgram =  (PFNGLUSEPROGRAMPROC)eglGetProcAddress("glUseProgram");
+    PFNGLGENBUFFERSPROC  glGenBuffers = (PFNGLGENBUFFERSPROC ) eglGetProcAddress("glGenBuffers");
+    PFNGLBINDBUFFERPROC glBindBuffer = (PFNGLBINDBUFFERPROC) eglGetProcAddress("glBindBuffer");
+    PFNGLBINDBUFFERBASEPROC glBindBufferBase = (PFNGLBINDBUFFERBASEPROC) eglGetProcAddress("glBindBufferBase");
+    PFNGLBUFFERDATAPROC glBufferData = (PFNGLBUFFERDATAPROC) eglGetProcAddress("glBufferData");
+    PFNGLTEXSTORAGE2DPROC glTexStorage2D = (PFNGLTEXSTORAGE2DPROC) eglGetProcAddress("glTexStorage2D");
+    PFNGLUNIFORM1IPROC glUniform1i = (PFNGLUNIFORM1IPROC) eglGetProcAddress("glUniform1i");
+    PFNGLUNIFORM1FPROC glUniform1f = (PFNGLUNIFORM1FPROC) eglGetProcAddress("glUniform1f");
+    PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC) eglGetProcAddress("glGetUniformLocation");
+    PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC) eglGetProcAddress("glUniformMatrix4fv");
+    PFNGLDISPATCHCOMPUTEPROC glDispatchCompute = (PFNGLDISPATCHCOMPUTEPROC)eglGetProcAddress("glDispatchCompute");
+    PFNGLMEMORYBARRIERPROC glMemoryBarrier = (PFNGLMEMORYBARRIERPROC)eglGetProcAddress("glMemoryBarrier");
+    PFNGLMAPBUFFERRANGEPROC glMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)eglGetProcAddress("glMapBufferRange");
+    PFNGLUNMAPBUFFERPROC glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)eglGetProcAddress("glUnmapBuffer");
+    PFNGLDELETEBUFFERSPROC glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)eglGetProcAddress("glDeleteBuffers");
+    #endif
     glUseProgram(s_info.shader_program);
         assert(get_gl_error(s_info.shader_program));
 
@@ -176,8 +220,12 @@ void shader_cleanup(shader_info s_info)
 {
     glDetachShader(s_info.shader_program, s_info.compute_shader);
     glUseProgram(0);
+ #ifdef OPEN3DGEN_HEADLESS
+    eglTerminate(eglDpy);
+ #else
     glfwDestroyWindow(s_info.window);
     glfwTerminate();
+#endif
 }
 
 void setup_compute_shaders(shader_info& s_info)
@@ -186,8 +234,76 @@ void setup_compute_shaders(shader_info& s_info)
         return;
     
     compute_shaders_init = true;
+#ifdef OPEN3DGEN_HEADLESS
+/*
+    EGLDisplay eglDpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+    EGLint major, minor;
+
+    eglInitialize(eglDpy, &major, &minor);
+*/
+    PFNEGLQUERYDEVICESEXTPROC eglQueryDevicesEXT = reinterpret_cast<PFNEGLQUERYDEVICESEXTPROC>(eglGetProcAddress("eglQueryDevicesEXT"));
+    PFNEGLGETPLATFORMDISPLAYEXTPROC eglGetPlatformDisplayEXT = reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(eglGetProcAddress("eglGetPlatformDisplayEXT"));
+
+    if (!eglQueryDevicesEXT || !eglGetPlatformDisplayEXT) {
+        std::cerr << "Failed to get function pointers for EGL extensions" << std::endl;
+            return;
+    }
+
+    EGLDisplay eglDpy;
+
+    // Initialize EGL display
+    EGLDeviceEXT device;
+    EGLint numDevices;
+    eglQueryDevicesEXT(0, NULL, &numDevices);
+    EGLDeviceEXT* devices = new EGLDeviceEXT[numDevices];
+    eglQueryDevicesEXT(numDevices, devices, &numDevices);
+    device = devices[0];
+    delete[] devices;
+
+    EGLint attribs[] = { EGL_NONE };
+    eglDpy = eglGetPlatformDisplayEXT(EGL_PLATFORM_DEVICE_EXT, device, attribs);
+    eglInitialize(eglDpy, NULL, NULL);
+
+    // 2. Select an appropriate configuration
+    EGLint numConfigs;
+    EGLConfig eglCfg;
+
+    eglChooseConfig(eglDpy, configAttribs, &eglCfg, 1, &numConfigs);
+
+    // 3. Create a surface
+    EGLSurface eglSurf = eglCreatePbufferSurface(eglDpy, eglCfg, 
+                                            pbufferAttribs);
+
+    // 4. Bind the API
+    eglBindAPI(EGL_OPENGL_API);
+
+    // 5. Create a context and make it current
+    EGLint contextAttribs[] = {
+        EGL_CONTEXT_MAJOR_VERSION, 4,
+        EGL_CONTEXT_MINOR_VERSION, 6,
+        EGL_CONTEXT_OPENGL_PROFILE_MASK, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
+        EGL_NONE
+    };
+    // 5. Create a context and make it current
+    ctx = eglCreateContext(eglDpy, eglCfg, EGL_NO_CONTEXT,contextAttribs);
+
+    eglMakeCurrent(eglDpy, eglSurf, eglSurf, ctx);
+
+    PFNGLCREATEPROGRAMPROC glCreateProgram = (PFNGLCREATEPROGRAMPROC) eglGetProcAddress("glCreateProgram");
+    PFNGLATTACHSHADERPROC glAttachShader = (PFNGLATTACHSHADERPROC) eglGetProcAddress("glAttachShader");
+    PFNGLLINKPROGRAMPROC glLinkProgram = (PFNGLLINKPROGRAMPROC) eglGetProcAddress("glLinkProgram");
+    PFNGLGETINTEGERI_VPROC glGetIntegeri_v = (PFNGLGETINTEGERI_VPROC) eglGetProcAddress("glGetIntegeri_v");
+
+
+#else
     if (!glfwInit())
-        throw std::runtime_error("couldn't init GLFW, aborting in main");
+     {
+        const char* description;
+        int code = glfwGetError(&description);
+        std::string desc = description;
+        throw std::runtime_error("couldn't init GLFW, aborting in main " + desc);
+     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -201,6 +317,7 @@ void setup_compute_shaders(shader_info& s_info)
 
     glewExperimental = GL_TRUE;
     glewInit();
+#endif
 
     std::string shader_str = shader::read_shader(DATAFILE_PATH + TEXTURE_PROJECTION_COMPUTE_SHADER_PATH);
 
@@ -258,13 +375,21 @@ void setup_compute_shaders(shader_info& s_info)
 
 GLuint compile_shader(const std::string& shader)
 {
+    #ifdef OPEN3DGEN_HEADLESS
+    PFNGLCREATESHADERPROC glCreateShader =  (PFNGLCREATESHADERPROC)eglGetProcAddress("glCreateShader");
+    PFNGLSHADERSOURCEPROC glShaderSource = (PFNGLSHADERSOURCEPROC) eglGetProcAddress("glShaderSource");
+    PFNGLCOMPILESHADERPROC glCompileShader = (PFNGLCOMPILESHADERPROC) eglGetProcAddress("glCompileShader");
+    PFNGLGETSHADERIVPROC glGetShaderiv = (PFNGLGETSHADERIVPROC) eglGetProcAddress("glGetShaderiv");
+    PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC) eglGetProcAddress("glGetShaderInfoLog");
+    PFNGLDELETESHADERPROC glDeleteShader = (PFNGLDELETESHADERPROC) eglGetProcAddress("glDeleteShader");
+    #endif
     GLuint shader_i = glCreateShader(GL_COMPUTE_SHADER);
 
     const char* shader_c_str = shader.c_str();
 
     glShaderSource(shader_i, 1, &shader_c_str, nullptr);
     glCompileShader(shader_i);
-
+    //return shader_i;
     GLint compile_status = 0;
     glGetShaderiv(shader_i, GL_COMPILE_STATUS, &compile_status);
     if (compile_status != GL_FALSE)

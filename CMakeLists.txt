@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.10.2)
 set (CMAKE_CXX_STANDARD 17)
 # add_compile_options(-std=c++17)
 
+# Add option for headless build
+option(HEADLESS "Build without GUI" OFF)
+
+
 set(CMAKE_THREAD_LIBS_INIT "-lpthread")
 set(CMAKE_HAVE_THREADS_LIBRARY 1)
 set(CMAKE_USE_WIN32_THREADS_INIT 0)
@@ -30,10 +34,17 @@ list(APPEND Open3D_LIBRARIES dl)
 
 find_package(GLEW REQUIRED)
 find_package(glfw3 3.3 REQUIRED)
+set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
 
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
+
+if(HEADLESS)
+    add_definitions(-DOPEN3DGEN_HEADLESS)
+    message(STATUS "Building without GUI")
+    list(INSERT GLEW_LIBRARIES 0 "EGL")
+endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${Open3D_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Open3D_CXX_FLAGS} -fopenmp") 
@@ -44,7 +55,7 @@ add_compile_options(-Wno-deprecated-declarations)
 add_compile_options(-Wno-unused-result)
 
 # add_definitions(-g -fopenmp)
-add_definitions(-O3 -fopenmp)
+add_definitions(-O3 -fopenmp -g)
 
 message(STATUS "Found Open3D ${Open3D_VERSION} ${Open3D_LIBRARY_DIRS}")
 
