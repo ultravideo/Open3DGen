@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Open3D/Open3D.h>
+#include <open3d/Open3D.h>
 // #include <open3d/pipelines/registration/ColoredICP.h>
-#include <Open3D/Registration/ColoredICP.h>
+#include <open3d/pipelines/registration/ColoredICP.h>
 #include <cstdint>
 #include <memory>
 #include <vector>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Open3D/Geometry/BoundingVolume.h>
-#include <Open3D/Open3D.h>
+#include <open3d/geometry/BoundingVolume.h>
+#include <open3d/Open3D.h>
 #include <cstdint>
 #include <memory>
 #include <algorithm>

@@ -1,10 +1,10 @@
-#include <Open3D/Geometry/BoundingVolume.h>
-#include <Open3D/Visualization/Utility/DrawGeometry.h>
+#include <open3d/geometry/BoundingVolume.h>
+#include <open3d/visualization/utility/DrawGeometry.h>
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <Open3D/Open3D.h>
+#include <open3d/Open3D.h>
 #include <exception>
 #include <fstream>
 #include <memory>

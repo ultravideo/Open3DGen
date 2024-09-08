@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Open3D/Open3D.h>
+#include <open3d/Open3D.h>
 #include <vector>
 #include <array>
 #include <algorithm>

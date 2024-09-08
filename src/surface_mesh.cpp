@@ -1,6 +1,6 @@
 #include "surface_mesh.h"
-#include <Open3D/Geometry/BoundingVolume.h>
-#include <Open3D/Geometry/TriangleMesh.h>
+#include <open3d/geometry/BoundingVolume.h>
+#include <open3d/geometry/TriangleMesh.h>
 #include <memory>
 
 namespace stitcher3d

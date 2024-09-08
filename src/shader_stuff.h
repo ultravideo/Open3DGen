@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Open3D/Camera/PinholeCameraIntrinsic.h>
-#include <Open3D/Open3D.h>
+#include <open3d/camera/PinholeCameraIntrinsic.h>
+#include <open3d/Open3D.h>
 #include <string>
 #include <tuple>
 #include <vector>

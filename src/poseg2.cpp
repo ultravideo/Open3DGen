@@ -3,8 +3,8 @@
 #include "math_modules.h"
 #include "utilities.h"
 #include <Eigen/src/Core/Matrix.h>
-#include <Open3D/Geometry/PointCloud.h>
-#include <Open3D/Visualization/Utility/DrawGeometry.h>
+#include <open3d/geometry/PointCloud.h>
+#include <open3d/visualization/utility/DrawGeometry.h>
 #include <boost/core/use_default.hpp>
 #include <cstdint>
 #include <functional>

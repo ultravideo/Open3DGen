@@ -1,7 +1,7 @@
 #pragma once
 
 // #include <Eigen/src/Core/Matrix.h>
-#include <Open3D/Open3D.h>
+#include <open3d/Open3D.h>
 #include <cstdint>
 #include <fmt/core.h>
 #include <iterator>

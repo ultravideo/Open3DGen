@@ -1,10 +1,10 @@
 #pragma once
-#include <Open3D/Camera/PinholeCameraIntrinsic.h>
-#include <Open3D/Geometry/Image.h>
-#include <Open3D/Geometry/PointCloud.h>
+#include <open3d/camera/PinholeCameraIntrinsic.h>
+#include <open3d/geometry/Image.h>
+#include <open3d/geometry/PointCloud.h>
 #include <cstdint>
 
-#include <Open3D/Open3D.h>
+#include <open3d/Open3D.h>
 #include <memory>
 // #include "../libraries/libmv/src/libmv/correspondence/feature_matching.h"
 #include <opencv2/core/types.hpp>

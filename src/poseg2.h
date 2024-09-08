@@ -29,8 +29,8 @@
 
 #include <cstdint>
 #include <iostream>
-#include <Open3D/Open3D.h>
-#include <Open3D/Registration/ColoredICP.h>
+#include <open3d/Open3D.h>
+#include <open3d/pipelines/registration/ColoredICP.h>
 #include <opencv2/core/types.hpp>
 #include <set>
 #include <vector>
