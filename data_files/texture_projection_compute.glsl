@@ -1,4 +1,4 @@
-#version 460
+#version 450
 
 #define DEPTH_SCALE 0.001f
 #define DEPTH_CLIP_FAR 6.0f

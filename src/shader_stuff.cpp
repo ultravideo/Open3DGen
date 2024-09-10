@@ -16,8 +16,8 @@ EGLDisplay eglDpy;
           EGL_NONE
   };    
 
-  static const int pbufferWidth = 640;
-  static const int pbufferHeight = 480;
+  static const int pbufferWidth = 10;
+  static const int pbufferHeight = 10;
 
   static const EGLint pbufferAttribs[] = {
         EGL_WIDTH, pbufferWidth,
@@ -218,6 +218,10 @@ std::shared_ptr<std::vector<pixel_data>> dispatch_compute_shader(shader_info& s_
 
 void shader_cleanup(shader_info s_info)
 {
+#ifdef OPEN3DGEN_HEADLESS
+    PFNGLUSEPROGRAMPROC glUseProgram =  (PFNGLUSEPROGRAMPROC)eglGetProcAddress("glUseProgram");
+    PFNGLDETACHSHADERPROC glDetachShader = (PFNGLDETACHSHADERPROC)eglGetProcAddress("glDetachShader");
+ #endif
     glDetachShader(s_info.shader_program, s_info.compute_shader);
     glUseProgram(0);
  #ifdef OPEN3DGEN_HEADLESS
@@ -288,7 +292,7 @@ void setup_compute_shaders(shader_info& s_info)
     // 5. Create a context and make it current
     ctx = eglCreateContext(eglDpy, eglCfg, EGL_NO_CONTEXT,contextAttribs);
 
-    eglMakeCurrent(eglDpy, eglSurf, eglSurf, ctx);
+    eglMakeCurrent(eglDpy, NULL, NULL, ctx);
 
     PFNGLCREATEPROGRAMPROC glCreateProgram = (PFNGLCREATEPROGRAMPROC) eglGetProcAddress("glCreateProgram");
     PFNGLATTACHSHADERPROC glAttachShader = (PFNGLATTACHSHADERPROC) eglGetProcAddress("glAttachShader");
