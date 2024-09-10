@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
             #endif
         }
 
-        if (simplify_voxel_size != 0.f)
+        if (simplify_voxel_size != 0.f && pcloud_scale != 0.f)
         {
             mesh->decimate(simplify_voxel_size * pcloud_scale);
 
@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
                 mesh->generate_mesh(poisson_depth);    
             }
 
-            if (simplify_voxel_size != 0.f)
+            if (simplify_voxel_size != 0.f && pcloud_scale != 0.f)
             {
                 mesh->decimate(simplify_voxel_size * pcloud_scale);
 
