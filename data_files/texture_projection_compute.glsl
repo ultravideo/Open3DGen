@@ -170,7 +170,7 @@ void main()
     // set_false(xy_coord, linear_out_coord);
     // return;
 
-    float d_val = texture2D(depth_texture, vec2(float(xy_coord.x) / float(WIDTH), float(xy_coord.y) / float(HEIGHT))).r;
+    float d_val = texture(depth_texture, vec2(float(xy_coord.x) / float(WIDTH), float(xy_coord.y) / float(HEIGHT))).r;
 
     if (abs(d_val) < 0.001f)
     {

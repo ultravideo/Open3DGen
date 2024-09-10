@@ -6,10 +6,15 @@
 #include "s3d_camera.h"
 
 // either VERBOSE or MINIMAL, not both
+#ifdef _DEBUG
 #define DEBUG_VERBOSE
-// #define DEBUG_MINIMAL
+#else
+#define DEBUG_MINIMAL
+#endif
 
-#define DEBUG_VISUALIZE
+#ifdef _DEBUG
+  #define DEBUG_VISUALIZE
+#endif
 
 namespace stitcher3d
 {

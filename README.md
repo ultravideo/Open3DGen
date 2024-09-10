@@ -1,7 +1,7 @@
 # Open3DGen
 
 ## Building
-Ubuntu 21.04 -based Linux distros should work. Tested on Pop-os 21.04. 
+Ubuntu 24.04 -based Linux distros should work.
 
 ### Hardware Requirements
 OpenGL 4.6 capable GPU, any decently modern GPU should do. With higher resolution textures (4k, 8k) 64Gb of RAM is recommended. This requiremenet will be fixed in a future release. Multicore CPU is recommended, as Open3DGen is highly parallelized.
@@ -16,19 +16,26 @@ Recommended RAM amounts:
 ### Dependencies
 The following dependencies can be found in the repositories:
 ```
-libboost1.71-all-dev
+libboost1.83-all-dev
 libopencv-dev
 libopencv-contrib-dev
-libopen3d-dev
 libglfw-dev
 libglew-dev
 libopengl-dev
+libeigen3-dev
+libfmt-dev
+libc++-dev
+build-essential
+cmake
 ```
 and can be installed with the command
 ```
-sudo apt install -y libboost1.71-all-dev && sudo apt install -y libopencv-dev && sudo apt install -y libopencv-contrib-dev && sudo apt install -y libopen3d-dev && sudo apt install -y libglfw3-dev && sudo apt install -y libglew-dev && sudo apt install -y libopengl-dev
+sudo apt install -y libboost1.83-all-dev libopencv-dev libopencv-contrib-dev libc++-dev
+sudo apt install -y libglfw3-dev libglew-dev libopengl-dev libeigen3-dev libfmt-dev build-essential cmake
 ```
 Installing GTSAM requires building from source: https://github.com/borglab/gtsam.
+
+Install Open3D 0.18 prebuilt or compile from https://github.com/isl-org/Open3D/releases/tag/v0.18.0.
 
 Make sure clang is also installed. Clang12 was used on the development platform. 
 
